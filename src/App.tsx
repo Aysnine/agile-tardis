@@ -51,6 +51,16 @@ function App() {
               by: "P1",
             },
           },
+          {
+            id: uuid(),
+            timestamp: ts("2022-05-10"),
+            trait: {
+              type: "card-move",
+              which: "story02",
+              to: "done",
+              by: "P2",
+            },
+          },
         ]}
       />
     </div>
@@ -59,7 +69,9 @@ function App() {
 
 function Slogan() {
   return (
-    <h1 style={{ textAlign: "center", fontWeight: "300", marginBottom: '100px' }}>
+    <h1
+      style={{ textAlign: "center", fontWeight: "300", marginBottom: "100px" }}
+    >
       <span style={{ color: "#163c4d" }}>Agile</span>
       <span style={{ color: "#e26a7c" }}>Tardis</span>
     </h1>
