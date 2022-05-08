@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agile-tardis-preview
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      k8s-app: agile-tardis-preview
+  template:
+    metadata:
+      labels:
+        k8s-app: agile-tardis-preview
+    spec:
+      containers:
+      - env:
+        image: ccr.ccs.tencentyun.com/aysnine/agile-tardis-preview:latest
+        name: agile-tardis-preview
+        resources:
+          limits:
+            cpu: 100m
+            memory: 64Mi
+          requests:
+            cpu: 10m
+            memory: 64Mi
+      imagePullSecrets:
+      - name: qcloudregistrykey
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agile-tardis-preview
+spec:
+  type: ClusterIP
+  ports:
+  - name: entry
+    port: 80
+    targetPort: 80
+  selector:
+    k8s-app: agile-tardis-preview
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: agile-tardis-preview
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`agile-tardis.cnine.d2.pub`)
+      kind: Rule
+      services:
+        - name: agile-tardis-preview
+          port: entry
+      middlewares:
+        - name: agile-tardis-preview-https-redirect-middleware
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: agile-tardis-preview-https-redirect-middleware
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: agile-tardis-preview-tls
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`agile-tardis.cnine.d2.pub`)
+      kind: Rule
+      services:
+        - name: agile-tardis-preview
+          port: entry
+  tls:
+    certResolver: default
