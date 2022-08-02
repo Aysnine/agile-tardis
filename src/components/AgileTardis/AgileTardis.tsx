@@ -46,6 +46,8 @@ const AgileTardis: React.FC<Props> = ({ timeRange, events, principles }) => {
   }, [autoplay, currentTime, speed, timeRange]);
 
   useEffect(() => {
+    const passedEvents = sortedEvents.filter((i) => i.timestamp <= currentTime);
+
     setComputedPrinciples(() => {
       // TODO improve performance by smart migration
 
@@ -55,12 +57,9 @@ const AgileTardis: React.FC<Props> = ({ timeRange, events, principles }) => {
         visible: i.trait.type === "place",
         joinMe: [],
         place: null,
-        currentStayTime: null,
       }));
 
-      for (const e of sortedEvents) {
-        if (e.timestamp > currentTime) continue;
-
+      passedEvents.forEach((e) => {
         const type = e.trait.type;
         if (type === "card-born") {
           const card = find(e, e.trait.which);
@@ -71,7 +70,7 @@ const AgileTardis: React.FC<Props> = ({ timeRange, events, principles }) => {
             !checkType(e, card, "card") ||
             !checkType(e, place, "place")
           )
-            continue;
+            return;
 
           card.visible = true;
           card.place = place.id;
@@ -86,14 +85,14 @@ const AgileTardis: React.FC<Props> = ({ timeRange, events, principles }) => {
             !checkType(e, card, "card") ||
             !checkType(e, toPlace, "place")
           )
-            continue;
+            return;
 
           card.visible = true;
           card.place = toPlace.id;
         } else {
           unrecognized(e);
         }
-      }
+      });
 
       function find(event: RawEventBase, targetId: Id) {
         const target = c.find((t) => t.id === targetId);
@@ -252,7 +251,7 @@ const AgileTardis: React.FC<Props> = ({ timeRange, events, principles }) => {
                     style={{
                       fontSize: 14,
                       overflow: "hidden",
-                      fontWeight: "bolder",
+                      fontWeight: 'bolder',
                       textOverflow: "ellipsis",
                     }}
                   >
@@ -334,7 +333,6 @@ interface ComputedPrinciple {
   visible: boolean;
   joinMe: Array<Id>;
   place: Id | null;
-  currentStayTime: number | null;
 }
 
 export default AgileTardis;
